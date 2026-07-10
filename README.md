@@ -35,7 +35,7 @@ Sebuah sistem cerdas untuk mengekstrak, menyimpan, dan memvisualisasikan data da
 Navigate to the backend directory and set up the Python environment:
 
 ```bash
-git clone [https://github.com/yourusername/mutualfund-dashboard.git](https://github.com/yourusername/mutualfund-dashboard.git)
+git clone https://github.com/Wisandoo/mutualfund-dashboard.git
 cd mutualfund-dashboard/backend
 
 # Buat virtual environment dan aktifkan
