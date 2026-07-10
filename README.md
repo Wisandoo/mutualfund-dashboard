@@ -57,7 +57,7 @@ python manage.py runserver
 Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembangan:
 
 ```bash
-cd mutualfund-dashboard/ffs-frontend
+cd ffs-frontend
 
 # Install dependensi node modules
 npm install
@@ -65,5 +65,16 @@ npm install
 # Jalankan development server
 npm run dev
 ```
+### 3. Data Extraction Pipeline (Django Management Command)
+Proses ekstraksi data PDF tidak dieksekusi melalui antarmuka web untuk menghindari *timeout* dan beban server. Sebagai gantinya, sistem ini menggunakan **Custom Django Management Command** agar proses *batching* berjalan efisien dan terintegrasi penuh dengan Django ORM.
+
+**Cara menguji coba ekstraksi data:**
+Repositori ini sudah dilengkapi dengan beberapa sampel file dokumen PDF Fund Fact Sheet di dalam direktori `ffs_input/` untuk keperluan pengujian. Anda bisa langsung menjalankan *pipeline* ekstraksi ini dengan langkah berikut:
+
+1. Buka terminal di dalam folder proyek Anda dan pastikan *virtual environment* sudah aktif.
+2. Jalankan perintah eksekusi berikut:
+
+   ```bash
+   python manage.py extract_ffs
 
 
