@@ -57,10 +57,10 @@ python manage.py runserver
 Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembangan:
 
 ```bash
-cd ffs-frontend
 
 # Install dependensi node modules
 npx create-next-app@latest ffs-frontend
+cd ffs-frontend
 
 # Install recharts
 npm install recharts
