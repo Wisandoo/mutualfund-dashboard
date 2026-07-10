@@ -60,7 +60,10 @@ Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembanga
 cd ffs-frontend
 
 # Install dependensi node modules
-npm install
+npx create-next-app@latest ffs-frontend
+
+# Install recharts
+npm install recharts
 
 # Jalankan development server
 npm run dev
