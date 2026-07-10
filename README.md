@@ -83,5 +83,10 @@ Repositori ini sudah dilengkapi dengan beberapa sampel file dokumen PDF Fund Fac
 
    ```bash
    python manage.py extract_ffs
+Setelah proses ekstraksi selesai dengan sukses, sistem akan otomatis menghasilkan data di dua direktori baru:
+
+sql_output/: Berisi file query (contoh: UOB_insert.sql, Sucorinvest_insert.sql, Syailendra_insert.sql). Lakukan import atau eksekusi file .sql ini ke dalam database MySQL Anda untuk memasukkan data Fund Fact Sheet terbaru.
+
+ffs_output/: Berisi file PDF yang telah diekstrak dan diganti namanya secara otomatis menggunakan format Kode Produk (contoh: GAMA2EQC01EQUI01_FS_MAY_2026.pdf). Pindahkan atau copy seluruh file PDF di dalam folder ini ke direktori ffs-frontend/public/ agar file tersebut dapat diakses oleh sistem frontend.
 
 
