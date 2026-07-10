@@ -65,6 +65,10 @@ cd ffs-frontend
 # Install recharts
 npm install recharts
 
+# Masukkan file komponen dan tipe data (Manual Copy-Paste)
+# - Copy/pindahkan file `page.tsx` yang Anda miliki ke dalam folder `src/app/` (timpa/replace file bawaannya).
+# - Copy/pindahkan folder `types` (yang berisi file `ffs.ts`) ke dalam folder `src/` (sehingga menjadi `src/types/`).
+
 # Jalankan development server
 npm run dev
 ```
