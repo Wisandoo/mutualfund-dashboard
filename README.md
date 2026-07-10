@@ -36,7 +36,7 @@ Navigate to the backend directory and set up the Python environment:
 
 ```bash
 git clone https://github.com/Wisandoo/mutualfund-dashboard.git
-cd mutualfund-dashboard/backend
+cd mutualfund-dashboard
 
 # Buat virtual environment dan aktifkan
 python -m venv .venv
