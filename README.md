@@ -1,0 +1,69 @@
+# Mutual Fund Fact Sheet Dashboard
+
+## Overview
+Sebuah sistem cerdas untuk mengekstrak, menyimpan, dan memvisualisasikan data dari dokumen *Fund Fact Sheet* (FFS) Reksa Dana. Proyek ini mengotomatiskan pembacaan dokumen PDF dari berbagai Manajer Investasi (seperti Sucorinvest, Syailendra, dan UOB) dan menampilkannya dalam *dashboard* interaktif.
+
+## Core Features
+*   **Automated PDF Parsing:** Mengekstrak data krusial secara otomatis menggunakan Python Regex dan PDFPlumber (AUM, Tanggal Laporan, Alokasi Aset, Top 10 Holdings, dll).
+*   **Smart Data Normalization:** Membersihkan hasil OCR yang berantakan dan mengkategorikan kelas aset secara otomatis (Saham, Efek Utang, Pasar Uang).
+*   **Interactive Dashboard:** Antarmuka modern untuk memfilter produk berdasarkan Manajer Investasi, Jenis Produk, Kategori (Syariah/Konvensional), dan Mata Uang.
+*   **Visualisasi Dinamis:** Menggunakan Recharts untuk menampilkan alokasi aset dalam bentuk *Radial Bar Chart* yang akurat.
+*   **Database Integration:** Pembuatan *query* SQL otomatis (`INSERT ... ON DUPLICATE KEY UPDATE`) untuk memastikan data selalu *up-to-date*.
+
+## Technology Stack
+
+**Frontend:**
+*   Next.js / React.js
+*   Tailwind CSS
+*   Recharts
+
+**Backend & Data Pipeline:**
+*   Django / Django REST Framework (DRF)
+*   Python (pdfplumber, re, pandas)
+
+**Database:**
+*   MySQL / MariaDB
+
+## Local Environment Setup
+
+### Prerequisites
+*   Python 3.10+
+*   Node.js (v18+)
+*   MySQL/MariaDB Server
+
+### 1. Backend Setup (Django)
+Navigate to the backend directory and set up the Python environment:
+
+```bash
+git clone [https://github.com/yourusername/mutualfund-dashboard.git](https://github.com/yourusername/mutualfund-dashboard.git)
+cd mutualfund-dashboard/backend
+
+# Buat virtual environment dan aktifkan
+python -m venv .venv
+source .venv/Scripts/activate  # On Windows
+# source .venv/bin/activate    # On Unix/macOS
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Jalankan migrasi database
+python manage.py migrate
+
+# Jalankan server
+python manage.py runserver
+```
+
+### 2. Frontend Setup (Next.js)
+Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembangan:
+
+```bash
+cd mutualfund-dashboard/frontend-frontend
+
+# Install dependensi node modules
+npm install
+
+# Jalankan development server
+npm run dev
+```
+
+
