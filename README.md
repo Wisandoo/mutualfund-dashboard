@@ -57,7 +57,7 @@ python manage.py runserver
 Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembangan:
 
 ```bash
-cd mutualfund-dashboard/ffs-frontend
+cd ffs-frontend
 
 # Install dependensi node modules
 npm install
