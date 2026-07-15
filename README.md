@@ -62,7 +62,7 @@ Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembanga
 cd ffs-frontend
 
 # Install semua dependensi (Node modules, Recharts, dll akan otomatis terinstal)
-npm install recharts
+npm install
 
 # Jalankan development server
 npm run dev
