@@ -54,20 +54,15 @@ python manage.py runserver
 ```
 
 ### 2. Frontend Setup (Next.js)
+
 Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembangan:
 
 ```bash
-
-# Install dependensi node modules
-npx create-next-app@latest ffs-frontend
+# Masuk ke folder frontend
 cd ffs-frontend
 
-# Install recharts
+# Install semua dependensi (Node modules, Recharts, dll akan otomatis terinstal)
 npm install recharts
-
-# Masukkan file komponen dan tipe data (Manual Copy-Paste)
-- Copy/pindahkan file `page.tsx` yang Anda miliki ke dalam folder `src/app/` (timpa/replace file bawaannya).
-- Copy/pindahkan folder `types` (yang berisi file `ffs.ts`) ke dalam folder `src/` (sehingga menjadi `src/types/`).
 
 # Jalankan development server
 npm run dev
