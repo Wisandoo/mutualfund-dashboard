@@ -4,6 +4,7 @@ from mutualfund.services.pdf_service import PDFService
 from mutualfund.services.sql_service import SQLService
 from mutualfund.services.rename_service import RenameService
 from mutualfund.services.ksei_service import KseiService
+from mutualfund.services.pefindo_service import PefindoService
 from mutualfund.parsers.uob import UOBParser
 from mutualfund.parsers.syailendra import SyailendraParser
 from mutualfund.parsers.sucorinvest import SucorinvestParser
@@ -17,9 +18,11 @@ class Command(BaseCommand):
         output_dir = './ffs_output'
         sql_dir = './sql_output'
         ksei_file = 'KSEI_DATA_MAY_2026.txt'
+        pefindo_file = 'PEFINDO_BOND_RATING_MAY_2026.pdf'
         kode_produk_file = 'Kode Produk.xlsx'
 
-        ksei_svc = KseiService(ksei_file, kode_produk_file)
+        pefindo_svc = PefindoService(pefindo_file)
+        ksei_svc = KseiService(ksei_file, kode_produk_file, pefindo_service=pefindo_svc)
         sql_svc = SQLService(sql_dir)
         rename_svc = RenameService(output_dir)
         pdf_svc = PDFService()
@@ -57,6 +60,10 @@ class Command(BaseCommand):
                 parser = parsers[mi_name]
                 ffs_data = parser.parse(text)
                 
+                #print("=" * 80)
+                #print("FILE            :", filename)
+                #print("PARSER PRODUCT  :", ffs_data.get("productName"))
+                
                 if ffs_data.get('productName'):
                     found_code, found_name = ksei_svc.match_product_code(ffs_data['productName'])
                     if found_code:
@@ -66,6 +73,10 @@ class Command(BaseCommand):
                         ffs_data['productCode'] = f"UNKNOWN_{mi_name.upper()}_{filename[:6].upper()}"
                 else:
                     ffs_data['productCode'] = f"UNKNOWN_{mi_name.upper()}_{filename[:6].upper()}"
+                    
+                #print("FINAL CODE      :", ffs_data['productCode'])
+                #print("FINAL PRODUCT   :", ffs_data['productName'])
+                #print("=" * 80)
 
                 rename_svc.copy_and_rename(filepath, ffs_data['productCode'], ffs_data['ffsPeriod'])
                 sql_svc.add_query(mi_name, ffs_data)

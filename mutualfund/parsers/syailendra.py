@@ -1,10 +1,10 @@
 import re
 from mutualfund.parsers.base import BaseParser
-from mutualfund.utils import parse_aum
+from mutualfund.utils import parse_aum, clean_number
 
 class SyailendraParser(BaseParser):
 
-    def parse(self, text):
+    def parse(self, text, pdf_path=None):
         ffs_data = self.get_template()
 
         # 1. PARSING NAMA PRODUK
@@ -48,7 +48,6 @@ class SyailendraParser(BaseParser):
             alloc_dict = {}
             for cat, pct_str in alloc_matches:
                 cat_lower = cat.lower()
-                
                 if "saham" in cat_lower: norm_cat = "Saham"
                 elif "obligasi" in cat_lower: norm_cat = "Obligasi"
                 elif "deposito" in cat_lower: norm_cat = "Deposito"
@@ -57,20 +56,25 @@ class SyailendraParser(BaseParser):
                 else: norm_cat = cat.strip().title()
                     
                 pct = float(pct_str.replace(',', '.'))
-                
-                # Akumulasi nilai jika ada kategori yang terdeteksi dobel
                 alloc_dict[norm_cat] = alloc_dict.get(norm_cat, 0.0) + pct
                 
             for k, v in alloc_dict.items():
                 ffs_data['portfolioAllocations'].append({"name": k, "percentage": round(v, 2)})
 
         # 6. PARSING TOP 10 HOLDINGS
-        holdings_match = re.findall(r'\d+\.\s+([A-Z0-9\s]+?)\s+([\d\.,]+)%', text)
+        holdings_match = re.findall(r'\d+\.\s+([A-Za-z0-9\.\-\/\&]+(?:\s+[A-Za-z0-9\.\-\/\&]+)*)\s+([\d\.,]+)%', text)
+        
+        count = 0
         for code, pct in holdings_match:
+            if count >= 10: break
+            
             code_clean = code.strip()
-            pct_float = float(pct.replace(',', '.'))
-            enriched = self.ksei_service.enrich_holding_data(code_clean, ffs_data['ffsDate'])
-            enriched['percentage'] = pct_float
-            ffs_data['topHoldings'].append(enriched)
+            pct_float = clean_number(pct)
+            
+            if len(code_clean) > 3 and 0 < pct_float <= 100:
+                enriched = self.ksei_service.enrich_holding_data(code_clean, ffs_data.get('ffsDate', ''))
+                enriched['percentage'] = pct_float
+                ffs_data['topHoldings'].append(enriched)
+                count += 1
 
         return ffs_data

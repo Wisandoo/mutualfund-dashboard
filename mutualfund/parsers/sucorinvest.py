@@ -15,102 +15,6 @@ class SucorinvestParser(BaseParser):
         self.extract_allocations(text, ffs_data)
         self.extract_top_holdings(text, ffs_data)
         
-        # ====================================================
-        # START PRODUCT LOOKUP DIAGNOSTIC
-        # ====================================================
-
-        import difflib
-
-
-        p_name_raw = ffs_data.get("productName", "")
-
-        target_keywords = [
-            "KELAS C",
-            "SOVEREIGN BALANCED",
-            "MONEY MARKET USD"
-        ]
-
-        if any(k in p_name_raw.upper() for k in target_keywords):
-
-            print("\n" + "=" * 70)
-            print("PRODUCT LOOKUP DIAGNOSTIC")
-            print("=" * 70)
-
-            # ----------------------------
-            # RAW NAME
-            # ----------------------------
-            print("RAW PRODUCT NAME")
-            print(repr(p_name_raw))
-            print(f"Length : {len(p_name_raw)}")
-
-            # ----------------------------
-            # NORMALIZED NAME
-            # ----------------------------
-            normalized_name = re.sub(r"\s+", " ", p_name_raw).strip()
-
-            print("\nNORMALIZED PRODUCT NAME")
-            print(repr(normalized_name))
-            print(f"Length : {len(normalized_name)}")
-
-            # ----------------------------
-            # TEST REAL LOOKUP FUNCTION
-            # ----------------------------
-            print("\nTesting KseiService.match_product_code() ...")
-
-            kode_produk, excel_name = self.ksei_service.match_product_code(
-                normalized_name
-            )
-
-            if kode_produk:
-
-                print("\nMATCH FOUND")
-                print(f"Kode Produk : {kode_produk}")
-                print(f"Excel Name  : {excel_name}")
-
-            else:
-
-                print("\nMATCH NOT FOUND")
-
-                print("\nSearching similar product names...")
-
-                excel_names = (
-                    self.ksei_service.df_kode["nama produk"]
-                    .dropna()
-                    .astype(str)
-                    .tolist()
-                )
-
-                similarities = []
-
-                for db_name in excel_names:
-
-                    score = difflib.SequenceMatcher(
-                        None,
-                        normalized_name.upper(),
-                        db_name.upper()
-                    ).ratio()
-
-                    similarities.append((db_name, score))
-
-                similarities.sort(
-                    key=lambda x: x[1],
-                    reverse=True
-                )
-
-                print("\nTop 5 Similar Products")
-
-                for i, (name, score) in enumerate(similarities[:5], 1):
-
-                    print(f"{i}. {repr(name)}")
-                    print(f"   Similarity : {score:.3f}")
-
-            print("=" * 70 + "\n")
-
-        # ====================================================
-        # END PRODUCT LOOKUP DIAGNOSTIC
-        # ====================================================
-        
-        
         return ffs_data
 
     def extract_product(self, text, ffs_data):
@@ -212,18 +116,53 @@ class SucorinvestParser(BaseParser):
         if not sec:
             sec = SectionService.get_section(text, "Alokasi Efek Terbesar", "Kinerja")
             
-        pat = r'([A-Za-z0-9\.\,\-\&\s\(\)\/]+?)\s+(Obligasi|Saham|Pasar\s*Uang|Equity|Cash|EBU|Sukuk)\s*([\d\.,]+)\s*(?:%)?'
-        matches = re.findall(pat, sec, re.IGNORECASE | re.DOTALL)
+        if not sec:
+            return
+
+        sec_clean = re.sub(r'\s+', ' ', sec)
+        sec_clean = sec_clean.replace('|', ' ')
+        
+        # --- 1. AGGRESSIVE STATIC NOISE REMOVAL ---
+        # Menghapus paksa seluruh teks Alokasi Aset yang menyeberang dari kolom kiri
+        noises = [
+            r"Komposisi Geografis", r"Dalam Negeri\s*:\s*[\d\.,]+%", r"Luar Negeri\s*:\s*[\d\.,]+%",
+            r"Alokasi Aset", r"Alokasi Efek Terbesar", r"Berdasarkan Urutan Abjad",
+            r"Nama Efek", r"Jenis Efek", r"%\s*Kepemilikan",
+            r"Efek Ekuitas Syariah", r"Efek Ekuitas",
+            r"Inst\.?\s*Psr\.?\s*Uang.*?Setara Kas",
+            r"Inst\.?\s*Psr\.?\s*Uang.*?Deposito Syariah",
+            r"&/\s*Deposito Syariah",
+            r"SBSN\s*&/\s*Sukuk Korporasi",
+            r"Obligasi\s*&/\s*Sukuk Pemerintah RI\s*&?\s*BUMN Infrastruktur",
+            r"Obligasi\s*&/\s*Sukuk Korporasi",
+            r"Efek Syariah Berpendapatan Tetap",
+            r"Sukuk\s*\(dgn.*?\)",
+            r"Sukuk\s*&/\s*SBSN",
+            r"Efek Hutang"
+        ]
+        
+        for noise in noises:
+            sec_clean = re.sub(noise, ' ', sec_clean, flags=re.IGNORECASE)
+
+        # Hapus Dynamic Allocation
+        for alloc in ffs_data.get('portfolioAllocations', []):
+            alloc_pat = r'\s+'.join([re.escape(word) for word in alloc['name'].split()])
+            sec_clean = re.sub(alloc_pat, ' ', sec_clean, flags=re.IGNORECASE)
+
+        # --- 2. REGEX MATCHING ---
+        pat = r'([A-Za-z0-9\.\,\-\&\s\(\)\/]+?)\s+(Obligasi|Saham|Pasar\s*Uang|Equity|Cash|EBU|Sukuk|Deposito)\s*([\d\.,]+)\s*(?:%)?'
+        matches = re.findall(pat, sec_clean, re.IGNORECASE)
         
         count = 0
         for name_raw, t_type, pct_raw in matches:
             if count >= 10: break
-            n = re.sub(r'^(?:Nama Efek|Jenis Efek|%? Kepemilikan|\(Berdasarkan Urutan Abjad\))\s*', '', name_raw.strip(), flags=re.IGNORECASE)
-            n = re.sub(r'^[\d\.\,\%]+\s*|[:]+', '', n).replace('\n', ' ').strip()
+            
+            n = name_raw.strip()
+            n = re.sub(r'^[\d\.\,\%]+\s*|[:]+', '', n).strip()
             
             pct = clean_number(pct_raw)
             if len(n) > 3 and 0 < pct <= 100:
-                enriched = self.ksei_service.enrich_holding_data(n, ffs_data['ffsDate'])
+                enriched = self.ksei_service.enrich_holding_data(n, ffs_data.get('ffsDate', ''))
                 enriched['percentage'] = pct
                 ffs_data['topHoldings'].append(enriched)
                 count += 1
