@@ -35,8 +35,8 @@ Sebuah sistem cerdas untuk mengekstrak, menyimpan, dan memvisualisasikan data da
 Navigate to the backend directory and set up the Python environment:
 
 ```bash
-git clone [https://github.com/yourusername/mutualfund-dashboard.git](https://github.com/yourusername/mutualfund-dashboard.git)
-cd mutualfund-dashboard/backend
+git clone [https://github.com/yourusername/mutualfund-dashboard.git]
+cd mutualfund-dashboard
 
 # Buat virtual environment dan aktifkan
 python -m venv .venv
@@ -57,13 +57,36 @@ python manage.py runserver
 Buka terminal baru, masuk ke direktori frontend, dan jalankan server pengembangan:
 
 ```bash
-cd mutualfund-dashboard/ffs-frontend
 
 # Install dependensi node modules
-npm install
+npx create-next-app@latest ffs-frontend
+cd ffs-frontend
+
+# Install recharts
+npm install recharts
+
+# Masukkan file komponen dan tipe data (Manual Copy-Paste)
+- Copy/pindahkan file `page.tsx` yang Anda miliki ke dalam folder `src/app/` (timpa/replace file bawaannya).
+- Copy/pindahkan folder `types` (yang berisi file `ffs.ts`) ke dalam folder `src/` (sehingga menjadi `src/types/`).
 
 # Jalankan development server
 npm run dev
 ```
+### 3. Data Extraction Pipeline (Django Management Command)
+Proses ekstraksi data PDF tidak dieksekusi melalui antarmuka web untuk menghindari *timeout* dan beban server. Sebagai gantinya, sistem ini menggunakan **Custom Django Management Command** agar proses *batching* berjalan efisien dan terintegrasi penuh dengan Django ORM.
+
+**Cara menguji coba ekstraksi data:**
+Repositori ini sudah dilengkapi dengan beberapa sampel file dokumen PDF Fund Fact Sheet di dalam direktori `ffs_input/` untuk keperluan pengujian. Anda bisa langsung menjalankan *pipeline* ekstraksi ini dengan langkah berikut:
+
+1. Buka terminal di dalam folder proyek Anda dan pastikan *virtual environment* sudah aktif.
+2. Jalankan perintah eksekusi berikut:
+
+   ```bash
+   python manage.py extract_ffs
+Setelah proses ekstraksi selesai dengan sukses, sistem akan otomatis menghasilkan data di dua direktori baru:
+
+sql_output/: Berisi file query (contoh: UOB_insert.sql, Sucorinvest_insert.sql, Syailendra_insert.sql). Lakukan import atau eksekusi file .sql ini ke dalam database MySQL Anda untuk memasukkan data Fund Fact Sheet terbaru.
+
+ffs_output/: Berisi file PDF yang telah diekstrak dan diganti namanya secara otomatis menggunakan format Kode Produk (contoh: GAMA2EQC01EQUI01_FS_MAY_2026.pdf). Pindahkan atau copy seluruh file PDF di dalam folder ini ke direktori ffs-frontend/public/ agar file tersebut dapat diakses oleh sistem frontend.
 
 
