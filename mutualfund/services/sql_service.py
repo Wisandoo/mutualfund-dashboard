@@ -1,10 +1,11 @@
 import os
 import json
+from collections import defaultdict
 
 class SQLService:
     def __init__(self, output_dir):
         self.output_dir = output_dir
-        self.queries = {"UOB": [], "Sucorinvest": [], "Syailendra": []}
+        self.queries = defaultdict(list)
         os.makedirs(self.output_dir, exist_ok=True)
 
     def add_query(self, mi_name, ffs_data):
@@ -15,8 +16,7 @@ class SQLService:
                   VALUES ('{ffs_data['productCode']}', '{valid_sql_date}', '{json_data_str}', '{ffs_data['totalAum']}', now()) 
                   ON DUPLICATE KEY UPDATE data = VALUES(data), aum = VALUES(aum), latest = 1, created_datetime = now();"""
         
-        if mi_name in self.queries:
-            self.queries[mi_name].append(sql)
+        self.queries[mi_name].append(sql)    
 
     def save_all(self, stdout_func):
         for mi, queries in self.queries.items():

@@ -67,7 +67,7 @@ npm install
 # Jalankan development server
 npm run dev
 ```
-### 3. Data Extraction Pipeline (Django Management Command)
+### 3. Legacy Data Extraction Pipeline (Pendekatan Hardcoding)
 Proses ekstraksi data PDF tidak dieksekusi melalui antarmuka web untuk menghindari *timeout* dan beban server. Sebagai gantinya, sistem ini menggunakan **Custom Django Management Command** agar proses *batching* berjalan efisien dan terintegrasi penuh dengan Django ORM.
 
 **Cara menguji coba ekstraksi data:**
@@ -77,11 +77,26 @@ Repositori ini sudah dilengkapi dengan beberapa sampel file dokumen PDF Fund Fac
 2. Jalankan perintah eksekusi berikut:
 
    ```bash
-   python manage.py extract_ffs
+   python manage.py ai_extract_ffs
 Setelah proses ekstraksi selesai dengan sukses, sistem akan otomatis menghasilkan data di dua direktori baru:
 
 sql_output/: Berisi file query (contoh: UOB_insert.sql, Sucorinvest_insert.sql, Syailendra_insert.sql). Lakukan import atau eksekusi file .sql ini ke dalam database MySQL Anda untuk memasukkan data Fund Fact Sheet terbaru.
 
 ffs_output/: Berisi file PDF yang telah diekstrak dan diganti namanya secara otomatis menggunakan format Kode Produk (contoh: GAMA2EQC01EQUI01_FS_MAY_2026.pdf). Pindahkan atau copy seluruh file PDF di dalam folder ini ke direktori ffs-frontend/public/ agar file tersebut dapat diakses oleh sistem frontend.
 
+### 4. Smart Data Extraction Pipeline (AI-Powered)
+Ini adalah metode ekstraksi terbaru yang ditenagai oleh AI Agent (Gemini). Pendekatan ini sangat skalabel—jika Anda ingin menambahkan Manajer Investasi baru, Anda tidak perlu lagi mengedit kode Python. Cukup tambahkan file instruksi (prompt) .txt dengan nama MI tersebut ke dalam direktori mutualfund/ai/prompts.
 
+**Cara menguji coba ekstraksi data:**
+Pastikan file PDF berada di ffs_input/ dan variabel GEMINI_API_KEY sudah terkonfigurasi di file .env. Buka terminal, aktifkan virtual environment, dan jalankan perintah:
+
+1. Buka terminal di dalam folder proyek Anda dan pastikan *virtual environment* sudah aktif.
+2. Jalankan perintah eksekusi berikut:
+
+   ```bash
+   python manage.py ai_extract_ffs
+Setelah proses ekstraksi selesai dengan sukses, sistem akan otomatis menghasilkan data di dua direktori baru:
+
+sql_output_new/: Berisi file query (contoh: UOB_insert.sql, Sucorinvest_insert.sql, Syailendra_insert.sql). Lakukan import atau eksekusi file .sql ini ke dalam database MySQL Anda untuk memasukkan data Fund Fact Sheet terbaru.
+
+ffs_output_new/: Berisi file PDF yang telah diekstrak dan diganti namanya secara otomatis menggunakan format Kode Produk (contoh: GAMA2EQC01EQUI01_FS_MAY_2026.pdf). Pindahkan atau copy seluruh file PDF di dalam folder ini ke direktori ffs-frontend/public/ffs_output agar file tersebut dapat diakses oleh sistem frontend.
